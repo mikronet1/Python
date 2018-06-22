@@ -1,0 +1,124 @@
+$location = Read-Host -Prompt 'Lütfen dizini girin'
+
+
+$myArray =@()
+$items = Get-ChildItem -Path "$location"
+foreach ($item in $items)
+{
+			   if ($item.Attributes -eq "Directory")
+			   {
+			            Write-Host $item.Name
+			         $myArray += $item.Name
+			   }
+			 
+}
+
+$enbuyuk = $null
+for ($i = 0; $i -lt $myArray.Length; ++$i)
+	{
+
+		if ($enbuyuk -eq $null -or $myArray[$i] -gt $enbuyuk)
+			{
+				$enbuyuk = $myArray[$i]
+			}
+	}
+$enbuyuk = [int]$enbuyuk
+$enbuyuk = $enbuyuk + 1
+$enbuyuk.ToString()
+
+
+
+
+New-Item -ItemType directory -Path $location$enbuyuk
+
+$items = Get-ChildItem -Path "$location"
+foreach ($item in $items) 
+{ 
+	if   ($item.Attributes -ne "Directory")  
+ 	{
+
+			$dosyaAdi = $item.Name
+   			Copy-Item -Path "$location$dosyaAdi"  "$location\$enbuyuk" -Force
+
+ 	}
+    
+}
+$dizim =@()
+			$itemss = Get-ChildItem -Path "$location"
+			foreach ($itemim in $itemss)
+			{
+			      if ($itemim.Attributes -eq "Directory")
+
+			      {
+			            $dizim += $itemim.Name
+			      }
+			 
+			}
+
+			$sonbuyuk = $null
+			for ($i = 0; $i -lt $dizim.Length; ++$i)
+				{
+					
+					if ($sonbuyuk -eq $null -or $dizim[$i] -gt $sonbuyuk)
+						{
+							$sonbuyuk = $dizim[$i]
+						}
+				}
+			$sonbuyuk = [int]$sonbuyuk 
+			$sonbuyuk
+
+$msgBoxInput =  [System.Windows.MessageBox]::Show('Dönüşüm işlemi yapılsın mı ?','OK','OKCancel')
+
+switch  ($msgBoxInput) {
+
+  'OK' {
+
+
+  			$items = Get-ChildItem -Path "$location$sonbuyuk"
+			foreach ($item in $items) 
+			{ 
+				if   ($item.Attributes -ne "Directory")  
+ 				{
+
+					$dosyaAdi = $item.Name
+					$dosyaAdi
+   					Copy-Item "$location$sonbuyuk\$dosyaAdi" -Destination "$location"	
+ 				}
+    
+			}
+
+
+  }
+
+  'OKCancel' {
+
+  
+
+  }
+}
+Remove-Item $location$sonbuyuk  -Force
+
+
+
+
+
+
+
+
+
+
+
+$items = Get-ChildItem -Path "E:\"
+foreach ($item in $items) 
+{ 
+	if   ($item.Attributes -ne "Directory")  
+ 	{
+
+			$dosyaAdi = $item.Name
+   			Remove-Item -Path "E:\$dosyaAdi" -Force
+
+ 	}
+    
+}
+
+
