@@ -1,0 +1,48 @@
+$liste = @()
+$items = Get-ChildItem -Path "C:\Program Files (x86)\"
+ 	foreach ($item in $items)
+	{
+    	 if ($item.Attributes -eq "Directory")
+     	 {
+          $liste+=$item.Name
+      	 }
+ 	}
+		$value=$liste.Contains("nxlog")
+
+		if ($value -eq "True")
+			{	
+				$version = Get-WmiObject Win32_Product -Filter "Name like 'NXLog-CE'" | Select-Object -ExpandProperty Version
+ 				$location="C:\Program Files (x86)\nxlog\conf"
+ 				$arService = Get-Service -Name nxlog
+
+ 				if ($arService.Status -eq "Stopped")
+
+ 					{ 
+ 						Remove-Item "C:\Program Files (x86)\nxlog\conf\nxlog.conf" -Force
+ 						Copy-Item -Path "C:\users\mikronet\desktop\nxlog.conf" -Destination "C:\Program Files (x86)\nxlog\conf\nxlog.conf" -Verbose
+ 						start-service nxlog
+ 						New-EventLog –LogName Application –Source “NxlogEvent”
+						Write-EventLog –LogName Application –Source “NxlogEvent” –EventID 1 –Message “Konfigurasyon dosyasi aktif edildi ve servis baslatildi.Version : $version ”
+  		
+ 					}
+ 				else {
+ 						
+ 						New-EventLog –LogName Application –Source “NxlogEvent”
+						Write-EventLog –LogName Application –Source “NxlogEvent” –EventID 1 –Message “Nxlog Kurulu. Version : $version ”
+ 					}		
+			}
+		else 
+		{
+		$msifile= 'C:\users\mikronet\desktop\nxlog-ce-2.10.2102.msi' 
+		$arguments= ' /qn /l*v .\install_SQLSysClrTypes.txt' 
+		Start-Process `
+     		-file  $msifile `
+   			-arg $arguments `
+   			-passthru | wait-process
+   		Stop-Service nxlog
+     	Remove-Item "C:\Program Files (x86)\nxlog\conf\nxlog.conf" -Force
+     	Copy-Item -Path C:\users\mikronet\desktop\nxlog.conf -Destination "C:\Program Files (x86)\nxlog\conf\nxlog.conf"  -Verbose			
+     	Start-Service nxlog	
+     	New-EventLog –LogName Application –Source “NxlogEvent”
+     	Write-EventLog –LogName Application –Source “NxlogEvent” –EventID 1 –Message “Uygulama Basariyla Kuruldu ve Servis Baslatildi”
+		}
